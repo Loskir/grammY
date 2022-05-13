@@ -353,14 +353,16 @@ export namespace IButton {
     }
 }
 
-type MaybeArray<T> = T | T[]
+type KeyboardPart<T> = T | T[] | T[][]
 export function If<T extends KeyboardButton>(pred: boolean, then: T, e: T): T
 export function If<T extends InlineKeyboardButton>(pred: boolean, then: T, e: T): T
 export function If<T extends KeyboardButton>(pred: boolean, then: T, e?: T): T | undefined
 export function If<T extends InlineKeyboardButton>(pred: boolean, then: T, e?: T): T | undefined
 export function If<T extends KeyboardButton[]>(pred: boolean, then: T, e?: T): T
 export function If<T extends InlineKeyboardButton[]>(pred: boolean, then: T, e?: T): T
-export function If<T extends MaybeArray<InlineKeyboardButton | KeyboardButton>>(pred: boolean, then: T, e?: T): T | undefined {
+export function If<T extends KeyboardButton[][]>(pred: boolean, then: T, e?: T): T
+export function If<T extends InlineKeyboardButton[][]>(pred: boolean, then: T, e?: T): T
+export function If<T extends KeyboardPart<InlineKeyboardButton | KeyboardButton>>(pred: boolean, then: T, e?: T): T | undefined {
     if (pred) {
         return then
     }
