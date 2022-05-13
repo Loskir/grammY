@@ -38,6 +38,34 @@ export class Keyboard {
      */
     public readonly keyboard: KeyboardButton[][] = [[]];
 
+    constructor(keyboard?: KeyboardButton[][]) {
+        if (keyboard) {
+            this.keyboard = keyboard
+        }
+    }
+
+    // public resize_keyboard?: boolean;
+    // public one_time_keyboard?: boolean;
+    // public input_field_placeholder?: string;
+    // public selective?: boolean;
+
+    // resize(v = true): this {
+    //     this.resize_keyboard = v
+    //     return this
+    // }
+    // oneTime(v = true): this {
+    //     this.one_time_keyboard = v
+    //     return this
+    // }
+    // inputFieldPlaceholder(v: string): this {
+    //     this.input_field_placeholder = v
+    //     return this
+    // }
+    // selective(v = true): this {
+    //     this.selective = v
+    //     return this
+    // }
+
     /**
      * Allows you to add your own `KeyboardButton` objects if you already have
      * them for some reason. You most likely want to call one of the other
@@ -112,6 +140,7 @@ export class Keyboard {
     webApp(text: string, url: string) {
         return this.add({ text, web_app: { url } });
     }
+
     /**
      * Return the resulting custom keyboard that was built. May be called in the
      * end if necessary so you can specify more options in `reply_markup`.
@@ -149,6 +178,12 @@ export class InlineKeyboard {
      */
     public readonly inline_keyboard: InlineKeyboardButton[][] = [[]];
 
+    constructor(keyboard?: InlineKeyboardButton[][]) {
+        if (keyboard) {
+            this.inline_keyboard = keyboard
+        }
+    }
+
     /**
      * Allows you to add your own `InlineKeyboardButton` objects if you already
      * have them for some reason. You most likely want to call one of the other
@@ -182,7 +217,7 @@ export class InlineKeyboard {
      * @param url HTTP or tg:// url to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
      */
     url(text: string, url: string) {
-        return this.add({ text, url });
+        return this.add(IButton.url(text, url));
     }
     /**
      * Adds a new callback query button. The button contains a text and a custom
@@ -203,7 +238,7 @@ export class InlineKeyboard {
      * @param data The callback data to send back to your bot (default = text)
      */
     text(text: string, data = text) {
-        return this.add({ text, callback_data: data });
+        return this.add(IButton.text(text, data));
     }
     /**
      * Adds a new web app button, confer https://core.telegram.org/bots/webapps
@@ -212,7 +247,7 @@ export class InlineKeyboard {
      * @param url An HTTPS URL of a Web App to be opened with additional data
      */
     webApp(text: string, url: string) {
-        return this.add({ text, web_app: { url } });
+        return this.add(IButton.webApp(text, url));
     }
     /**
      * Adds a new login button. This can be used as a replacement for the
@@ -223,12 +258,7 @@ export class InlineKeyboard {
      * @param loginUrl The login URL as string or `LoginUrl` object
      */
     login(text: string, loginUrl: string | LoginUrl) {
-        return this.add({
-            text,
-            login_url: typeof loginUrl === "string"
-                ? { url: loginUrl }
-                : loginUrl,
-        });
+        return this.add(IButton.login(text, loginUrl));
     }
     /**
      * Adds a new inline query button. Telegram clients will let the user pick a
@@ -246,7 +276,7 @@ export class InlineKeyboard {
      * @param query The (optional) inline query string to prefill
      */
     switchInline(text: string, query = "") {
-        return this.add({ text, switch_inline_query: query });
+        return this.add(IButton.switchInline(text, query));
     }
     /**
      * Adds a new inline query button that act on the current chat. The selected
@@ -263,7 +293,7 @@ export class InlineKeyboard {
      * @param query The (optional) inline query string to prefill
      */
     switchInlineCurrent(text: string, query = "") {
-        return this.add({ text, switch_inline_query_current_chat: query });
+        return this.add(IButton.switchInlineCurrent(text, query));
     }
     /**
      * Adds a new game query button, confer
@@ -274,7 +304,7 @@ export class InlineKeyboard {
      * @param text The text to display
      */
     game(text: string) {
-        return this.add({ text, callback_game: {} });
+        return this.add(IButton.game(text));
     }
     /**
      * Adds a new payment button, confer
@@ -286,6 +316,63 @@ export class InlineKeyboard {
      * @param text The text to display
      */
     pay(text: string) {
-        return this.add({ text, pay: true });
+        return this.add(IButton.pay(text));
     }
+}
+
+// deno-lint-ignore no-namespace
+export namespace IButton {
+    export function url(text: string, url: string): InlineKeyboardButton {
+        return { text, url };
+    }
+    export function text(text: string, data = text): InlineKeyboardButton {
+        return { text, callback_data: data }
+    }
+    export function webApp(text: string, url: string): InlineKeyboardButton {
+        return { text, web_app: { url } };
+    }
+    export function login(text: string, loginUrl: string | LoginUrl): InlineKeyboardButton {
+        return {
+            text,
+            login_url: typeof loginUrl === "string"
+                ? { url: loginUrl }
+                : loginUrl,
+        }
+    }
+    export function switchInline(text: string, query = ""): InlineKeyboardButton {
+        return { text, switch_inline_query: query };
+    }
+    export function switchInlineCurrent(text: string, query = ""): InlineKeyboardButton {
+        return { text, switch_inline_query_current_chat: query };
+    }
+    export function game(text: string): InlineKeyboardButton {
+        return { text, callback_game: {} };
+    }
+    export function pay(text: string): InlineKeyboardButton {
+        return { text, pay: true };
+    }
+}
+
+type MaybeArray<T> = T | T[]
+export function If<T extends KeyboardButton>(pred: boolean, then: T, e: T): T
+export function If<T extends InlineKeyboardButton>(pred: boolean, then: T, e: T): T
+export function If<T extends KeyboardButton>(pred: boolean, then: T, e?: T): T | undefined
+export function If<T extends InlineKeyboardButton>(pred: boolean, then: T, e?: T): T | undefined
+export function If<T extends KeyboardButton[]>(pred: boolean, then: T, e?: T): T
+export function If<T extends InlineKeyboardButton[]>(pred: boolean, then: T, e?: T): T
+export function If<T extends MaybeArray<InlineKeyboardButton | KeyboardButton>>(pred: boolean, then: T, e?: T): T | undefined {
+    if (pred) {
+        return then
+    }
+    if (!e && Array.isArray(then)) {
+        // @ts-ignore: fix later :D
+        return []
+    }
+    return e
+}
+
+export function Filter(k: (InlineKeyboardButton | undefined)[][]): InlineKeyboardButton[][] {
+    return k
+        .map((row) => row.filter((v): v is InlineKeyboardButton => !!v))
+        .filter((row) => row.length > 0)
 }
